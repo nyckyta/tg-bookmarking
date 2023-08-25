@@ -45,7 +45,6 @@ func main() {
 				url = "https://" + url
 			}
 
-			// handles only first youtube url? Will you ever paste two urls in one message?
 			if category.IsYotubueUrl(url) {
 				log.Printf("Youtube url found %s", url)
 				urlKeyWords, err := fetcher.Fetch(url)
