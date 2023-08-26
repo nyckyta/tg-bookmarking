@@ -47,7 +47,8 @@ func (fetcher *YoutubeTagsFetcher) Fetch(request string) ([]string, error) {
 	return resp.Items[0].Snippet.Tags, nil
 }
 
-func IsYotubueUrl(request string) bool {
+// returns true if url is youtube url to specific video
+func IsYoutubeUrlToSpecificVideo(request string) bool {
 	err := validateYoutubeUrl(request)
 	return err == nil
 }
@@ -55,8 +56,8 @@ func IsYotubueUrl(request string) bool {
 // validates that string is a valid Youtube video url
 func validateYoutubeUrl(request string) error {
 	loweredRequest := strings.ToLower(request)
-	// took from https://regexr.com/3dj5t
-	reg, err := regexp.Compile(`^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$`)
+	// took from https://regexr.com/3dj5t with slight improvement, specifically adding youtube-nocookie.com domain
+	reg, err := regexp.Compile(`^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be|youtube-nocookie.com))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$`)
 	
 	if err != nil {
 		panic("Error compiling Youtube url regexp")
@@ -69,12 +70,52 @@ func validateYoutubeUrl(request string) error {
 	return nil
 }
 
-// parses normalized url to Youtube video and extracts video id from it
+// parses normalized url to Youtube video and extracts video id from it, it expects that URL is always valid and thus has a video id
+// otherwise it will return empty string
 func extractVideoIdFromUrl(videoUrl string) string {
 	url, e := url.Parse(videoUrl)
-	if e != nil || url.Query().Get("v") == "" {
+
+	if e != nil {
 		return ""
 	}
 
-	return url.Query().Get("v")
+	// handle the case when video id is embeded as url parameter
+	if url.Query().Get("v") != "" {
+		return url.Query().Get("v")
+	}
+
+	pathTokens := strings.Split(url.Path, "/")
+	if len(pathTokens) > 0 && pathTokens[0] == "" {
+		pathTokens = pathTokens[1:]
+	}
+	
+	if len(pathTokens) == 1 {
+		// weirdest from all urls, can path contain ampersands?
+		// TODO: figure this format out
+		if strings.HasSuffix(pathTokens[0], "&feature=channel") {
+			return strings.TrimSuffix(pathTokens[0], "&feature=channel")
+		}
+		// handle url like {domain}/oembed?url={another youtube url with video id}
+		if pathTokens[0] == "oembed" && url.Query().Has("url") {
+			parameterUrl := url.Query().Get("url")
+			return extractVideoIdFromUrl(parameterUrl)
+		}
+
+		// handle url like {domain}/attribution_link?...&u={another youtube url with video id}
+		if pathTokens[0] == "attribution_link" && url.Query().Has("u") {
+			modifiedUrl := "https://www.youtube.com" + url.Query().Get("u")
+			return extractVideoIdFromUrl(modifiedUrl)
+		}
+
+		// handles the {domain}/{VIDEO_ID} case
+		return pathTokens[0]
+	}
+
+	// handles the {domain}/(embed|v|e|oembed)/{VIDEO_ID} case
+	if (pathTokens[0] == "embed" || pathTokens[0] == "v" || pathTokens[0] == "e") {
+		return pathTokens[1]
+	}
+	
+
+	return ""
 }
