@@ -43,8 +43,12 @@ func (fetcher *YoutubeTagsFetcher) Fetch(request string) ([]string, error) {
 	if len(resp.Items) == 0 {
 		return nil, errors.New("video not found")
 	}
-
-	return resp.Items[0].Snippet.Tags, nil
+	
+	keywords := make([]string, len(resp.Items[0].Snippet.Tags))
+	for i, tag := range resp.Items[0].Snippet.Tags {
+		keywords[i] = normalizeKeyword(tag)
+	}
+	return keywords, nil
 }
 
 // returns true if url is youtube url to specific video
