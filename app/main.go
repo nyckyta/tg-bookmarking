@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goware/urlx"
 	category "github.com/nyckyta/tg-bookmarking/app/categorization"
 	tele "gopkg.in/telebot.v3"
 	xurls "mvdan.cc/xurls/v2"
@@ -13,12 +14,18 @@ import (
 
 func main() {
 	// init youtube service
-	apiKey := os.Getenv("GOOGLE_API_KEY")
-	if apiKey == ""  {
+	googleApiKey := os.Getenv("GOOGLE_API_KEY")
+	if googleApiKey == ""  {
 		panic("GOOGLE_API_KEY environment variable is not set")
 	}
 
-	fetcher := category.YoutubeTagsFetcher{ApiKey: apiKey}
+	openaiApiKey := os.Getenv("OPENAI_API_KEY")
+	if openaiApiKey == ""  {
+		panic("OPENAI_API_KEY environment variable is not set")
+	}
+
+	youtubeFetcher := category.YoutubeTagsFetcher{ApiKey: googleApiKey}
+	gptFetcher := category.ChatGptTagsFetcher{OpenAiApiKey: openaiApiKey}
 
 	// init bot
 	pref := tele.Settings{
@@ -33,41 +40,69 @@ func main() {
 	}
 
 	b.Handle(tele.OnText, func(c tele.Context) error {
+		log.Printf("[INFO] Received msg from %s\n", c.Sender().Username)
+		
+		// process urls initially
 		urls := xurls.Relaxed().FindAllString(c.Text(), -1)
-		log.Printf("Urls found: %s\n", urls)
-		if len(urls) == 0 {
-			return nil	
-		}
+		log.Printf("[INFO] Found %d urls in message", len(urls))
 
-		keywords := []string{}
+		keywordsMap := map[string]bool{}
 		for _, url := range urls {
-			if !strings.HasPrefix(url, "https://") {
-				url = "https://" + url
+			normalizedUrl, err := urlx.NormalizeString(url)
+			if err != nil {
+				log.Printf("[ERR] Failed to normalize url %v", err)
+				return nil
 			}
 
-			if category.IsYotubueUrl(url) {
-				log.Printf("Youtube url found %s", url)
-				urlKeyWords, err := fetcher.Fetch(url)
+			if (category.IsYoutubeUrlToSpecificVideo(normalizedUrl)) {
+				urlKeyWords, err := youtubeFetcher.Fetch(normalizedUrl)
 				if err != nil {
-					log.Println(err)
+					log.Printf("[ERR] Error fetching keywordsMap from url %s: %s", url, err)
 					continue
 				}
-				keywords = append(keywords, urlKeyWords...)
+
+				for _, keyword := range urlKeyWords {
+					keywordsMap[keyword] = true
+				}
+				continue
+			}
+
+			urlKeyWords, err := gptFetcher.Fetch(normalizedUrl)
+			if err != nil {
+				log.Printf("[ERR] Error fetching keywordsMap from url %s: %s", url, err)
+				continue
+			}
+			for _, keyword := range urlKeyWords {
+				keywordsMap[keyword] = true
 			}
 		}
 
-		if len(keywords) > 0 {
-			editedMsg := c.Message().Text + "\n\nKeywords:\n" + strings.Join(keywords, ", ")
-			err = c.Send(editedMsg)
-			if err != nil {
-				log.Println(err)
+		log.Printf("[INFO] Processed urls, found keywords %d", len(keywordsMap))
+
+		keywords := make([]string, 0, len(keywordsMap))
+		for k := range keywordsMap {
+			if strings.Trim(k, " \n\t") == "" {
+				continue
 			}
-			c.Delete()
+			keywords = append(keywords, k)
 		}
+
+		log.Printf("[INFO] Found %d keywords", len(keywords))
+		
+		if len(keywordsMap) == 0 {
+			return nil
+		}
+
+		editedMsg := c.Message().Text + "\n\nKeywords:\n" + strings.Join(keywords, ", ")
+		err = c.Send(editedMsg)
+		if err != nil {
+			log.Printf("[ERR] Failed to send message %s", err)
+		}
+		c.Delete() 
 
 		return nil
 	});
 
-	log.Println("Bot started")
+	log.Println("[INFO] Bot started")
 	b.Start()
 }
