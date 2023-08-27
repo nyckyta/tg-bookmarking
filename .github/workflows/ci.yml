@@ -13,11 +13,17 @@ jobs:
         with:
           go-version: '1.21.0'
 
+      - name: run-format-check
+        run: gofmt -l app/*.go
+
+      - name: run-linter
+        uses: golangci/golangci-lint-action@v2
+        
       - name: install-dependencies
         run: go get ./...
           
-      - name: Build
+      - name: build
         run: go build -v ./...
 
-      - name: Test
+      - name: test
         run: go test -v ./...
