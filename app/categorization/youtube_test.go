@@ -9,7 +9,7 @@ import (
 // each set is divided by video id i.e. each set contains examples with the same video id
 
 // videoId = -wtIMTCHWuI
-var youtubeUrls_set1 = []string {
+var youtubeUrls_set1 = []string{
 	"http://www.youtube.com/watch?v=-wtIMTCHWuI",
 	"http://youtube.com/watch?v=-wtIMTCHWuI",
 	"http://m.youtube.com/watch?v=-wtIMTCHWuI",
@@ -30,7 +30,7 @@ var youtubeUrls_set1 = []string {
 }
 
 // videoId = lalOy8Mbfdc
-var youtubeUrls_set2 = []string {
+var youtubeUrls_set2 = []string{
 	"https://www.youtube.com/watch?v=lalOy8Mbfdc",
 	"https://youtube.com/watch?v=lalOy8Mbfdc",
 	"https://m.youtube.com/watch?v=lalOy8Mbfdc",
@@ -61,7 +61,7 @@ var youtubeUrls_set2 = []string {
 }
 
 // videoId = yZv2daTWRZU
-var youtubeUrls_set3 = []string {
+var youtubeUrls_set3 = []string{
 	"http://www.youtube.com/watch?v=yZv2daTWRZU&feature=em-uploademail",
 	"http://youtube.com/watch?v=yZv2daTWRZU&feature=em-uploademail",
 	"http://m.youtube.com/watch?v=yZv2daTWRZU&feature=em-uploademail",
@@ -77,7 +77,7 @@ var youtubeUrls_set3 = []string {
 }
 
 // videoId = 0zM3nApSvMg
-var youtubeUrls_set4 = []string {
+var youtubeUrls_set4 = []string{
 	"http://www.youtube.com/watch?v=0zM3nApSvMg&feature=feedrec_grec_index",
 	"http://youtube.com/watch?v=0zM3nApSvMg&feature=feedrec_grec_index",
 	"http://m.youtube.com/watch?v=0zM3nApSvMg&feature=feedrec_grec_index",
@@ -100,14 +100,14 @@ var youtubeUrls_set4 = []string {
 }
 
 // videoId = cKZDdG9FTKY
-var youtubeUrls_set5 = []string {
+var youtubeUrls_set5 = []string{
 	"http://www.youtube.com/watch?v=cKZDdG9FTKY&feature=channel",
 	"http://youtube.com/watch?v=cKZDdG9FTKY&feature=channel",
 	"http://m.youtube.com/watch?v=cKZDdG9FTKY&feature=channel",
 }
 
 // videoId = oTJRivZTMLs
-var youtubeUrls_set6 = []string {
+var youtubeUrls_set6 = []string{
 	"https://www.youtube.com/watch?v=oTJRivZTMLs&feature=channel",
 	"https://youtube.com/watch?v=oTJRivZTMLs&feature=channel",
 	"https://m.youtube.com/watch?v=oTJRivZTMLs&feature=channel",
@@ -118,7 +118,7 @@ var youtubeUrls_set6 = []string {
 }
 
 // videoId = dQw4w9WgXcQ
-var youtubeUrls_set7 = []string {
+var youtubeUrls_set7 = []string{
 	"http://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=youtube_gdata_player",
 	"http://youtube.com/watch?v=dQw4w9WgXcQ&feature=youtube_gdata_player",
 	"http://m.youtube.com/watch?v=dQw4w9WgXcQ&feature=youtube_gdata_player",
@@ -160,7 +160,7 @@ var youtubeUrls_set7 = []string {
 }
 
 // videoId = ishbTyLs6ps
-var youtubeUrls_set8 = []string {
+var youtubeUrls_set8 = []string{
 	"http://www.youtube.com/watch?v=ishbTyLs6ps&list=PLGup6kBfcU7Le5laEaCLgTKtlDcxMqGxZ&index=106&shuffle=2655",
 	"http://youtube.com/watch?v=ishbTyLs6ps&list=PLGup6kBfcU7Le5laEaCLgTKtlDcxMqGxZ&index=106&shuffle=2655",
 	"http://m.youtube.com/watch?v=ishbTyLs6ps&list=PLGup6kBfcU7Le5laEaCLgTKtlDcxMqGxZ&index=106&shuffle=2655",
@@ -170,7 +170,7 @@ var youtubeUrls_set8 = []string {
 }
 
 // videoId = 3DEhxJLojIE_o
-var youtubeUrls_set9 = []string {
+var youtubeUrls_set9 = []string{
 	"http://www.youtube.com/attribution_link?a=JdfC0C9V6ZI&u=%2Fwatch%3Fv%3DEhxJLojIE_o%26feature%3Dshare",
 	"http://youtube.com/attribution_link?a=JdfC0C9V6ZI&u=%2Fwatch%3Fv%3DEhxJLojIE_o%26feature%3Dshare",
 	"http://m.youtube.com/attribution_link?a=JdfC0C9V6ZI&u=%2Fwatch%3Fv%3DEhxJLojIE_o%26feature%3Dshare",
@@ -180,7 +180,7 @@ var youtubeUrls_set9 = []string {
 }
 
 // videoId = nas1rJpm7wY
-var youtubeUrls_set10 = []string {
+var youtubeUrls_set10 = []string{
 	"http://www.youtube.com/embed/nas1rJpm7wY?rel=0",
 	"http://youtube.com/embed/nas1rJpm7wY?rel=0",
 	"http://m.youtube.com/embed/nas1rJpm7wY?rel=0",
@@ -280,6 +280,3 @@ func TestIsYoutubeUrl_failed(t *testing.T) {
 	assert.False(t, IsYoutubeUrlToSpecificVideo("youtube.com/"), "Url youtube.com is expected to be invalid Youtube url without video id")
 	assert.False(t, IsYoutubeUrlToSpecificVideo("https://www.youtube.com/@dreamtheaterofficial"), "Url youtube.com is expected to be invalid Youtube url, since this is link to the channel")
 }
-
-
-	

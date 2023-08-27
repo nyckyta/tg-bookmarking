@@ -15,12 +15,12 @@ import (
 func main() {
 	// init youtube service
 	googleApiKey := os.Getenv("GOOGLE_API_KEY")
-	if googleApiKey == ""  {
+	if googleApiKey == "" {
 		panic("GOOGLE_API_KEY environment variable is not set")
 	}
 
 	openaiApiKey := os.Getenv("OPENAI_API_KEY")
-	if openaiApiKey == ""  {
+	if openaiApiKey == "" {
 		panic("OPENAI_API_KEY environment variable is not set")
 	}
 
@@ -41,7 +41,7 @@ func main() {
 
 	b.Handle(tele.OnText, func(c tele.Context) error {
 		log.Printf("[INFO] Received msg from %s\n", c.Sender().Username)
-		
+
 		// process urls initially
 		urls := xurls.Relaxed().FindAllString(c.Text(), -1)
 		log.Printf("[INFO] Found %d urls in message", len(urls))
@@ -54,7 +54,7 @@ func main() {
 				return nil
 			}
 
-			if (category.IsYoutubeUrlToSpecificVideo(normalizedUrl)) {
+			if category.IsYoutubeUrlToSpecificVideo(normalizedUrl) {
 				urlKeyWords, err := youtubeFetcher.Fetch(normalizedUrl)
 				if err != nil {
 					log.Printf("[ERR] Error fetching keywordsMap from url %s: %s", url, err)
@@ -88,7 +88,7 @@ func main() {
 		}
 
 		log.Printf("[INFO] Found %d keywords", len(keywords))
-		
+
 		if len(keywordsMap) == 0 {
 			return nil
 		}
@@ -98,10 +98,14 @@ func main() {
 		if err != nil {
 			log.Printf("[ERR] Failed to send message %s", err)
 		}
-		c.Delete() 
+
+		err := c.Delete()
+		if err != nil {
+			log.Printf("[ERR] Failed to delete message %s", err)
+		}
 
 		return nil
-	});
+	})
 
 	log.Println("[INFO] Bot started")
 	b.Start()

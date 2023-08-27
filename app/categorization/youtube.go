@@ -43,7 +43,7 @@ func (fetcher *YoutubeTagsFetcher) Fetch(request string) ([]string, error) {
 	if len(resp.Items) == 0 {
 		return nil, errors.New("video not found")
 	}
-	
+
 	keywords := make([]string, len(resp.Items[0].Snippet.Tags))
 	for i, tag := range resp.Items[0].Snippet.Tags {
 		keywords[i] = normalizeKeyword(tag)
@@ -62,7 +62,7 @@ func validateYoutubeUrl(request string) error {
 	loweredRequest := strings.ToLower(request)
 	// took from https://regexr.com/3dj5t with slight improvement, specifically adding youtube-nocookie.com domain
 	reg, err := regexp.Compile(`^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be|youtube-nocookie.com))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$`)
-	
+
 	if err != nil {
 		panic("Error compiling Youtube url regexp")
 	}
@@ -92,7 +92,7 @@ func extractVideoIdFromUrl(videoUrl string) string {
 	if len(pathTokens) > 0 && pathTokens[0] == "" {
 		pathTokens = pathTokens[1:]
 	}
-	
+
 	if len(pathTokens) == 1 {
 		// weirdest from all urls, can path contain ampersands?
 		// TODO: figure this format out
@@ -116,10 +116,9 @@ func extractVideoIdFromUrl(videoUrl string) string {
 	}
 
 	// handles the {domain}/(embed|v|e|oembed)/{VIDEO_ID} case
-	if (pathTokens[0] == "embed" || pathTokens[0] == "v" || pathTokens[0] == "e") {
+	if pathTokens[0] == "embed" || pathTokens[0] == "v" || pathTokens[0] == "e" {
 		return pathTokens[1]
 	}
-	
 
 	return ""
 }

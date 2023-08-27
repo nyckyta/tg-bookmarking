@@ -18,13 +18,13 @@ type ChatGptTagsFetcher struct {
 
 // generated with assistance https://mholt.github.io/curl-to-go/
 type gptPayload struct {
-	Model            string     `json:"model"`
-	Messages         []Message 	`json:"messages"`
-	Temperature      float64    `json:"temperature"`
-	MaxTokens        int        `json:"max_tokens"`
-	TopP             int        `json:"top_p"`
-	FrequencyPenalty int        `json:"frequency_penalty"`
-	PresencePenalty  int        `json:"presence_penalty"`
+	Model            string    `json:"model"`
+	Messages         []Message `json:"messages"`
+	Temperature      float64   `json:"temperature"`
+	MaxTokens        int       `json:"max_tokens"`
+	TopP             int       `json:"top_p"`
+	FrequencyPenalty int       `json:"frequency_penalty"`
+	PresencePenalty  int       `json:"presence_penalty"`
 }
 
 type gptResponse struct {
@@ -33,14 +33,14 @@ type gptResponse struct {
 	Created int    `json:"created"`
 	Model   string `json:"model"`
 	Choices []struct {
-		Index	   	int     `json:"index"`
-		Message    	Message `json:"message"`
-		FinishReason string `json:"finish_reason"`
+		Index        int     `json:"index"`
+		Message      Message `json:"message"`
+		FinishReason string  `json:"finish_reason"`
 	} `json:"choices"`
 	Usage struct {
-		PromtpTokens 		int `json:"prompt_tokens"`
-		CompletionTokens 	int `json:"completion_tokens"`
-		TotalTokens 		int `json:"total_tokens"`
+		PromtpTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+		TotalTokens      int `json:"total_tokens"`
 	} `json:"usage"`
 }
 
@@ -60,7 +60,7 @@ func (fetcher *ChatGptTagsFetcher) Fetch(text string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		
+
 		rawText = strings.Trim(rawText, " \n\t")
 		if rawText == "" {
 			log.Printf("[ERR] No raw text found by url %s", text)
@@ -68,7 +68,6 @@ func (fetcher *ChatGptTagsFetcher) Fetch(text string) ([]string, error) {
 		}
 		textToSend = rawText
 	}
-
 
 	if textToSend == "" {
 		return nil, fmt.Errorf("text is empty")
@@ -80,8 +79,8 @@ func (fetcher *ChatGptTagsFetcher) Fetch(text string) ([]string, error) {
 	}
 
 	gptPayloadBody := gptPayload{
-		Model:            "gpt-3.5-turbo",
-		Messages:         []Message{
+		Model: "gpt-3.5-turbo",
+		Messages: []Message{
 			{Role: "system", Content: "You will be provided with a block of text or a references to external websites, and your task is to extract a list of keywords from it."},
 			{Role: "user", Content: textToSend[:maxLenOfText]},
 		},
@@ -97,14 +96,14 @@ func (fetcher *ChatGptTagsFetcher) Fetch(text string) ([]string, error) {
 		return nil, fmt.Errorf("error marshaling gpt payload: %w", err)
 	}
 	body := bytes.NewReader(payloadBytes)
-	
+
 	req, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", body)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer " + fetcher.OpenAiApiKey)
-	
+	req.Header.Set("Authorization", "Bearer "+fetcher.OpenAiApiKey)
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error making request to gpt: %w", err)
