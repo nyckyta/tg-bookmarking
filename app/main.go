@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -33,6 +35,16 @@ func main() {
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	}
 
+	var allowedUser int = 0
+	if os.Getenv("ALLOWED_USER_ID") != "" {
+		parsed, err := strconv.Atoi(os.Getenv("ALLOWED_USER_ID"))
+		if err != nil {
+			panic("ALLOWED_USER_ID environment variable is not a valid integer")
+		}
+
+		allowedUser = parsed
+	}
+
 	b, err := tele.NewBot(pref)
 	if err != nil {
 		log.Fatal(err)
@@ -40,6 +52,12 @@ func main() {
 	}
 
 	b.Handle(tele.OnText, func(c tele.Context) error {
+		// do we have zero user? probably no
+		if allowedUser == 0 {
+			log.Printf("[INFO] Received msg from %s, ignoring\n", c.Sender().Username)
+			err := c.Send(fmt.Sprintf("Sorry, I don't know you, %s", c.Sender().Username))
+			return err
+		}
 		log.Printf("[INFO] Received msg from %s\n", c.Sender().Username)
 
 		// process urls initially
