@@ -81,7 +81,7 @@ func (fetcher *ChatGptTagsFetcher) Fetch(text string) ([]string, error) {
 	gptPayloadBody := gptPayload{
 		Model: "gpt-3.5-turbo",
 		Messages: []Message{
-			{Role: "system", Content: "You will be provided with a block of text, and your task is to extract a list of keywords from it and provide it as comma separated values."},
+			{Role: "system", Content: "You will be provided with a block of text, and your task is to extract a list of keywords from it and provide it as comma separated values. Exclude any punctuation and special characters from words."},
 			{Role: "user", Content: textToSend[:maxLenOfText]},
 		},
 		Temperature:      0.5,
