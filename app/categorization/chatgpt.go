@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const GPT_MSG_MAX_LEN = 1024
+const GPT_MSG_MAX_LEN = 2048
 
 type ChatGptTagsFetcher struct {
 	OpenAiApiKey string
@@ -81,7 +81,7 @@ func (fetcher *ChatGptTagsFetcher) Fetch(text string) ([]string, error) {
 	gptPayloadBody := gptPayload{
 		Model: "gpt-3.5-turbo",
 		Messages: []Message{
-			{Role: "system", Content: "You will be provided with a block of text or a references to external websites, and your task is to extract a list of keywords from it."},
+			{Role: "system", Content: "You will be provided with a block of text, and your task is to extract a list of keywords from it and provide it as comma separated values."},
 			{Role: "user", Content: textToSend[:maxLenOfText]},
 		},
 		Temperature:      0.5,
@@ -109,6 +109,11 @@ func (fetcher *ChatGptTagsFetcher) Fetch(text string) ([]string, error) {
 		return nil, fmt.Errorf("error making request to gpt: %w", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		log.Printf("[ERR] gpt response status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("gpt response status code: %d", resp.StatusCode)
+	}
 
 	var gptResponse gptResponse = gptResponse{}
 
